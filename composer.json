@@ -1,0 +1,40 @@
+{
+	"name":"bugbuster/contao-lang_to_url",
+	"description":"Contao CMS - add language to URL only for defined domains",
+	"keywords":["addLanguageToUrl","language","contao"],
+	"type":"contao-module",
+	"homepage":"http://contao.ninja",
+	"license":"LGPL-3.0+",
+	"authors":[
+		{
+			"name":"Glen Langer",
+			"homepage":"http://contao.ninja",
+			"role":"Developer"
+		}
+	],
+	"support":{
+		"issues":"https://github.com/BugBuster1701/contao-lang_to_url/issues",
+		"irc":"irc://irc.freenode.org/contao.dev",
+		"source":"https://github.com/BugBuster1701/contao-lang_to_url",
+		"forum":"https://community.contao.org/de/forumdisplay.php?119-Sonstige-Erweiterungen"
+	},
+	"require":{
+		"php":">=5.3",
+		"contao/core":">=3.4,<4",
+		"contao-community-alliance/composer-plugin": "*"
+	},
+	"autoload":{
+		"classmap":[""]
+	},
+	"extra":{
+		"contao":{
+			"sources":{
+				"src/contao-lang_to_url": "system/modules/lang_to_url"
+			}
+		},
+		"branch-alias": {
+			"dev-master": "0.0.x-dev",
+			"dev-develop": "0.1.x-dev"
+		}
+	}
+}
