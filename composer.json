@@ -30,6 +30,12 @@
 		"contao":{
 			"sources":{
 				"src/contao-lang_to_url": "system/modules/lang_to_url"
+			},
+			"transifex": {
+				"project": "contao-lang_to_url",
+				"prefix": "master-",
+				"languages_cto": "src/languages",
+				"languages_tx": ".tx"
 			}
 		},
 		"branch-alias": {
