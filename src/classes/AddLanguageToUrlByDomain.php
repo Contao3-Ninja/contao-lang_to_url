@@ -18,12 +18,12 @@ class AddLanguageToUrlByDomain
         
         //AddToUrl aktiviert?
         if ( isset($GLOBALS['TL_CONFIG']['useAddToUrl']) &&
-             true == (bool) $GLOBALS['TL_CONFIG']['useAddToUrl']
+             true === (bool) $GLOBALS['TL_CONFIG']['useAddToUrl']
            ) 
         {
             //Domain(s) eingetragen?
         	if ( isset($GLOBALS['TL_CONFIG']['useAddToUrlByDomain']) &&
-        	     true == (bool) $GLOBALS['TL_CONFIG']['useAddToUrlByDomain']
+        	     true === (bool) $GLOBALS['TL_CONFIG']['useAddToUrlByDomain']
         	   ) 
         	{
         	    //Domains einzeln pruefen, falls mehrere angegeben
