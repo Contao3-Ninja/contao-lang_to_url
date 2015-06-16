@@ -29,7 +29,7 @@
 	"extra":{
 		"contao":{
 			"sources":{
-				"src/contao-lang_to_url": "system/modules/lang_to_url"
+				"src/": "system/modules/lang_to_url"
 			},
 			"transifex": {
 				"project": "contao-lang_to_url",
