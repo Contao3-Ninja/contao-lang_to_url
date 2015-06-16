@@ -2,7 +2,7 @@
 
 require_once dirname(__FILE__) . '/../src/classes/AddLanguageToUrlByDomain.php';
 
-require_once 'PHPUnit/Framework/TestCase.php';
+//require_once 'PHPUnit/Framework/TestCase.php';
 
 define('TL_MODE', 'FE');
 
