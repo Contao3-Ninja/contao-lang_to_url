@@ -65,6 +65,8 @@ class AddLanguageToUrlByDomain
             return $arrPages; //raus, wird ja bereits durch Contao selbst erledigt
         }
         
+        unset($intRoot);
+        unset($blnSitemap);
         
         //no lang ?
         if ($strLanguage === null)
