@@ -30,7 +30,7 @@ class AddLanguageToUrlByDomain
         	    $arrDomains = explode(",", $GLOBALS['TL_CONFIG']['useAddToUrlByDomain']);
         	    foreach ($arrDomains as $Domain) 
         	    {
-        	    	if ( $this->checkDns($Domain) == $_SERVER['SERVER_NAME'] ) 
+        	    	if ( $this->checkDns($Domain) == strtolower( $_SERVER['SERVER_NAME'] ) ) 
         	    	{
         	    		$GLOBALS['TL_CONFIG']['addLanguageToUrl'] = true;
         	    	}
@@ -47,7 +47,7 @@ class AddLanguageToUrlByDomain
      */
     public function checkDns($varValue)
     {
-        return str_ireplace(array('http://', 'https://', 'ftp://'), '', trim($varValue));
+        return strtolower( str_ireplace(array('http://', 'https://', 'ftp://', '//'), '', trim($varValue) ) );
     }
     
     /**
@@ -60,19 +60,61 @@ class AddLanguageToUrlByDomain
      */
     public function getSearchablePagesLang($arrPages, $intRoot=null, $blnSitemap=false, $strLanguage=null)
     {
-        //no lang or no hook call for a sitemap?
-        if ($strLanguage === null || $blnSitemap === false)
+        if (true === (bool) $GLOBALS['TL_CONFIG']['addLanguageToUrl'])
+        {
+            return $arrPages; //raus, wird ja bereits durch Contao selbst erledigt
+        }
+        
+        
+        //no lang ?
+        if ($strLanguage === null)
         {
             return $arrPages;
         }
-        
-        $arrPagesLang = array();
-    
-        foreach ($arrPages as $strUrl)
+        //AddToUrl aktiviert?
+        if ( isset($GLOBALS['TL_CONFIG']['useAddToUrl']) &&
+             true === (bool) $GLOBALS['TL_CONFIG']['useAddToUrl']
+           )
         {
-            $arrParse = parse_url($strUrl);
-            $arrParse['path'] = '/' . $strLanguage . $arrParse['path'];
-            $arrPagesLang[] = $this->buildUrl($arrParse);
+            //Domain(s) eingetragen?
+            if ( isset($GLOBALS['TL_CONFIG']['useAddToUrlByDomain']) &&
+                 true === (bool) $GLOBALS['TL_CONFIG']['useAddToUrlByDomain']
+               )
+            {
+                $arrDomains = explode(",", $GLOBALS['TL_CONFIG']['useAddToUrlByDomain']);
+                foreach ($arrDomains as $Domain)
+                {
+                    $arrDomainsClean[] = $this->checkDns($Domain);
+                }
+                
+                $arrPagesLang = array();
+            
+                foreach ($arrPages as $strUrl)
+                {
+                    $arrParse = parse_url($strUrl);
+                    //Vergleich ob domain = einer der gewünschten ist!
+                    if (in_array(strtolower($arrParse['host']), $arrDomainsClean)) 
+                    {
+                        $arrParse['path'] = '/' . $strLanguage . $arrParse['path'];
+                        $arrPagesLang[] = $this->buildUrl($arrParse);
+                    }
+                    else 
+                    {
+                        //kompletter Abbruch, Domain passt nicht
+                        return $arrPages;
+                    }
+                }
+            }
+            else 
+            {
+                //keine Domain definniert für AddToUrl
+                return $arrPages;
+            }
+        }
+        else
+        {
+            //AddToUrl deaktiviert
+            return $arrPages;
         }
         
         return $arrPagesLang;
@@ -86,8 +128,6 @@ class AddLanguageToUrlByDomain
      */
     public function buildUrl($arrParse)
     {
-        //Alternative: jakeasmith/http_build_url
-
         if (!is_array($arrParse)) 
         {
         	return false;
