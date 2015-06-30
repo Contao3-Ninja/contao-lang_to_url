@@ -50,4 +50,94 @@ class AddLanguageToUrlByDomain
         return str_ireplace(array('http://', 'https://', 'ftp://'), '', trim($varValue));
     }
     
+    /**
+     * Hook getSearchablePages (SearchIndex and Sitemap)
+     * 
+     * @param array $arrPages
+     * @param string $intRoot
+     * @param string $blnSitemap
+     * @param string $strLanguage
+     */
+    public function getSearchablePagesLang($arrPages, $intRoot=null, $blnSitemap=false, $strLanguage=null)
+    {
+        //no lang or no hook call for a sitemap?
+        if ($strLanguage === null || $blnSitemap === false)
+        {
+            return $arrPages;
+        }
+        
+        $arrPagesLang = array();
+    
+        foreach ($arrPages as $strUrl)
+        {
+            $arrParse = parse_url($strUrl);
+            $arrParse['path'] = '/' . $strLanguage . $arrParse['path'];
+            $arrPagesLang[] = $this->buildUrl($arrParse);
+        }
+        
+        return $arrPagesLang;
+    }
+    
+    /**
+     * Shortened http_build_url
+     * 
+     * @param array $arrParse       returned array from parse_url
+     * @return string               builded url
+     */
+    public function buildUrl($arrParse)
+    {
+        //Alternative: jakeasmith/http_build_url
+
+        if (!is_array($arrParse)) 
+        {
+        	return false;
+        }
+        
+        $newurl = '';
+        if (isset($arrParse['scheme'])) 
+        {
+            $newurl .= $arrParse['scheme'] . '://';
+        }
+        
+        if (isset($arrParse['user'])) 
+        {
+            $newurl .= $arrParse['user'];
+            if (isset($arrParse['pass'])) 
+            {
+                $newurl .= ':' . $arrParse['pass'];
+            }
+            $newurl .= '@';
+        }
+        
+        if (isset($arrParse['host'])) 
+        {
+            $newurl .= $arrParse['host'];
+        }
+        
+        if (isset($arrParse['port'])) 
+        {
+            $newurl .= ':' . $arrParse['port'];
+        }
+        
+        if (!empty($arrParse['path'])) 
+        {
+            $newurl .= $arrParse['path'];
+        } 
+        else 
+        {
+            $newurl .= '/';
+        }
+        
+        if (isset($arrParse['query'])) 
+        {
+            $newurl .= '?' . $arrParse['query'];
+        }
+        
+        if (isset($arrParse['fragment'])) 
+        {
+            $newurl .= '#' . $arrParse['fragment'];
+        }
+        
+        return $newurl;
+    }
 }

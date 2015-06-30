@@ -125,5 +125,23 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('localhost',$return);
         
     }
+    
+    
+    public function testGetSearchablePagesLang()
+    {
+        //Test URL: http://user@www.example.com/pub/index.php?a=b#files
+        $this->markTestIncomplete("getSearchablePagesLang test not implemented");
+    }
+    
+    public function testBuildUrl()
+    {
+        //Test URL: http://user@www.example.com/pub/index.php?a=b#files
+        $this->markTestIncomplete("buildUrl test not implemented");
+    }
+    
+    
+    
+    
+    
 }
 
