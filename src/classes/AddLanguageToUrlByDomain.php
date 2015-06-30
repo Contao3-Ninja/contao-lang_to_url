@@ -97,8 +97,25 @@ class AddLanguageToUrlByDomain
                     //Vergleich ob domain = einer der gewünschten ist!
                     if (in_array(strtolower($arrParse['host']), $arrDomainsClean)) 
                     {
-                        $arrParse['path'] = '/' . $strLanguage . $arrParse['path'];
-                        $arrPagesLang[] = $this->buildUrl($arrParse);
+                        //URL-Rewrite aus? 
+                        if (false === (bool) $GLOBALS['TL_CONFIG']['rewriteURL']) 
+                        {
+                            //endet der path auf index.php? Dann muss nach Sprache noch ein / mit rein
+                            $add = '';
+                            if ('index.php' == substr($arrParse['path'],-9)) 
+                            {
+                            	$add = '/';
+                            }
+                        	$arrParse['path'] = str_ireplace('/index.php', '/index.php/'.$strLanguage.$add, $arrParse['path']);
+                        	$arrPagesLang[] = $this->buildUrl($arrParse);
+                        }
+                        else 
+                        {
+                            //TODO Unterverzeichnis beachten, Konstante TL_PATH sollte gesetzt und ungleich null sein
+                            //https://github.com/contao/core/blob/master/system/initialize.php#L136-L149
+                            $arrParse['path'] = '/' . $strLanguage . $arrParse['path'];
+                            $arrPagesLang[] = $this->buildUrl($arrParse);
+                        }
                     }
                     else 
                     {

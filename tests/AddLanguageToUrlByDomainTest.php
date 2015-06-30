@@ -176,16 +176,20 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
      * @covers BugBuster\LangToUrl\AddLanguageToUrlByDomain::getSearchablePagesLang
      * @covers BugBuster\LangToUrl\AddLanguageToUrlByDomain::buildUrl
      */    
-    public function testGetSearchablePagesLang()
+    public function testGetSearchablePagesLangRewriteOn()
     {
-        $arrPages[] = 'http://user@acme.com/pub/index.php?a=b#files';
         $arrPages[] = 'https://acme.com/contao.html';
         $arrPages[] = 'https://ACME.com/';
+        $arrPages[] = 'http://user@acme.com/?a=b#files';
+        $arrPages[] = 'https://acme.com/subdir/contao.html';
         
-        $arrPagesDe[] = 'http://user@acme.com/de/pub/index.php?a=b#files';
+        //Expected
         $arrPagesDe[] = 'https://acme.com/de/contao.html';
         $arrPagesDe[] = 'https://ACME.com/de/';
+        $arrPagesDe[] = 'http://user@acme.com/de/?a=b#files';
+        $arrPagesDe[] = 'https://acme.com/subdir/de/contao.html';
         
+        $GLOBALS['TL_CONFIG']['rewriteURL']          = true;
         $GLOBALS['TL_CONFIG']['addLanguageToUrl']    = false;
         $GLOBALS['TL_CONFIG']['useAddToUrl']         = true;
         $GLOBALS['TL_CONFIG']['useAddToUrlByDomain'] = 'acme.com';
@@ -198,6 +202,41 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
         $arrReturn  = $this->AddLanguageToUrlByDomain->getSearchablePagesLang($arrPages, 1, true, 'de');
         $this->assertEquals($arrPagesDe,$arrReturn);
     }
+    
+    /**
+     * @covers BugBuster\LangToUrl\AddLanguageToUrlByDomain::getSearchablePagesLang
+     * @covers BugBuster\LangToUrl\AddLanguageToUrlByDomain::buildUrl
+     */
+    public function testGetSearchablePagesLangRewriteOff()
+    {
+        //URLs umschreiben = aus
+        $arrPages[] = 'http://acme.com/index.php/contao.html';
+        //URLs umschreiben = aus + Installation in Unterverzeichnis /pub
+        $arrPages[] = 'http://acme.com/pub/index.php/contao.html';
+    
+        $arrPages[] = 'http://user@acme.com/pub/index.php?a=b#files';
+        $arrPages[] = 'http://user@acme.com/pub/index.php/alias.html?a=b#files';
+    
+        //Expected
+        $arrPagesDe[] = 'http://acme.com/index.php/de/contao.html';
+        $arrPagesDe[] = 'http://acme.com/pub/index.php/de/contao.html';
+        $arrPagesDe[] = 'http://user@acme.com/pub/index.php/de/?a=b#files';
+        $arrPagesDe[] = 'http://user@acme.com/pub/index.php/de/alias.html?a=b#files';
+    
+    
+        $GLOBALS['TL_CONFIG']['rewriteURL']          = false;
+        $GLOBALS['TL_CONFIG']['addLanguageToUrl']    = false;
+        $GLOBALS['TL_CONFIG']['useAddToUrl']         = true;
+        $GLOBALS['TL_CONFIG']['useAddToUrlByDomain'] = 'acme.com';
+    
+        //Ohne Sprache, Orginal muss zurück kommmen
+        $arrReturn  = $this->AddLanguageToUrlByDomain->getSearchablePagesLang($arrPages, 1, true);
+        $this->assertEquals($arrPages,$arrReturn);
+    
+        //Mit Sprache. Ersetzung muss erfolgen
+        $arrReturn  = $this->AddLanguageToUrlByDomain->getSearchablePagesLang($arrPages, 1, true, 'de');
+        $this->assertEquals($arrPagesDe,$arrReturn);
+    }
 
     /**
      * @covers BugBuster\LangToUrl\AddLanguageToUrlByDomain::buildUrl
@@ -205,6 +244,12 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
     public function testBuildUrl()
     {
         $testUrl = 'http://user:pass@www.acme.com:8080/pub/index.php?a=b#files';
+        //fwrite(STDOUT,"\n". __METHOD__ . " parse_url: ".print_r(parse_url($testUrl),true)."\n");
+        $return  = $this->AddLanguageToUrlByDomain->buildUrl(parse_url($testUrl));
+        $this->assertEquals($testUrl,$return);
+        
+        $testUrl = 'http://user:pass@www.acme.com:8080/index.php/alias.html?a=b#files';
+        //fwrite(STDOUT,"\n". __METHOD__ . " parse_url: ".print_r(parse_url($testUrl),true)."\n");
         $return  = $this->AddLanguageToUrlByDomain->buildUrl(parse_url($testUrl));
         $this->assertEquals($testUrl,$return);
         
