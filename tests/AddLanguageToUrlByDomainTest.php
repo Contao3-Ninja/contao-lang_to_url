@@ -1,10 +1,6 @@
 <?php
-
 require_once dirname(__FILE__) . '/../src/classes/AddLanguageToUrlByDomain.php';
 
-//require_once 'PHPUnit/Framework/TestCase.php';
-
-define('TL_MODE', 'FE');
 
 /**
  * AddLanguageToUrlByDomain test case.
@@ -18,6 +14,16 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
      */
     private $AddLanguageToUrlByDomain;
 
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public static function setUpBeforeClass()
+    {
+        define('TL_MODE', 'FE');
+        define('TL_PATH', '');
+    }
+    
     /**
      * Prepares the environment before running a test.
      */
@@ -48,7 +54,7 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
     
    
     /**
-     * Tests AddLanguageToUrlByDomain->setOption()
+     * @covers BugBuster\LangToUrl\AddLanguageToUrlByDomain::setOption
      */
     public function testSetOptionGlobalActivated()
     {
@@ -58,7 +64,7 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
     }
     
     /**
-     * Tests AddLanguageToUrlByDomain->setOption()
+     * @covers BugBuster\LangToUrl\AddLanguageToUrlByDomain::setOption
      */
     public function testSetOptionAddToUrlDeactivated()
     {
@@ -75,7 +81,8 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Tests AddLanguageToUrlByDomain->setOption()
+     * @covers BugBuster\LangToUrl\AddLanguageToUrlByDomain::setOption
+     * @covers BugBuster\LangToUrl\AddLanguageToUrlByDomain::checkDns
      */
     public function testSetOptionAddToUrlActivated()
     {
@@ -94,6 +101,14 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
         $return = $this->AddLanguageToUrlByDomain->setOption();
         $this->assertTrue($GLOBALS['TL_CONFIG']['addLanguageToUrl']);
         
+        //Groß Kleinschreibung testen
+        $GLOBALS['TL_CONFIG']['addLanguageToUrl'] = false;
+        $GLOBALS['TL_CONFIG']['useAddToUrl'] = true;
+        $GLOBALS['TL_CONFIG']['useAddToUrlByDomain'] = 'acme.com, LOCalhost';
+        $_SERVER['SERVER_NAME'] = 'localHOst';
+        $return = $this->AddLanguageToUrlByDomain->setOption();
+        $this->assertTrue($GLOBALS['TL_CONFIG']['addLanguageToUrl']);
+        
         $GLOBALS['TL_CONFIG']['addLanguageToUrl'] = false;
         $GLOBALS['TL_CONFIG']['useAddToUrl'] = true;
         $GLOBALS['TL_CONFIG']['useAddToUrlByDomain'] = 'acme.com, localhost';
@@ -105,7 +120,7 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
     
     
     /**
-     * Tests AddLanguageToUrlByDomain->checkDns()
+     * @covers BugBuster\LangToUrl\AddLanguageToUrlByDomain::checkDns
      */
     public function testCheckDns()
     {
@@ -124,24 +139,130 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
         $return = $this->AddLanguageToUrlByDomain->checkDns('ftp://localhost');
         $this->assertEquals('localhost',$return);
         
+        $return = $this->AddLanguageToUrlByDomain->checkDns('//localhost');
+        $this->assertEquals('localhost',$return);
+        
     }
     
-    
-    public function testGetSearchablePagesLang()
+    /**
+     * @covers BugBuster\LangToUrl\AddLanguageToUrlByDomain::getSearchablePagesLang
+     */
+    public function testGetSearchablePagesLangOff()
     {
-        //Test URL: http://user@www.example.com/pub/index.php?a=b#files
-        $this->markTestIncomplete("getSearchablePagesLang test not implemented");
+        $arrPages[] = 'http://user@acme.com/pub/index.php?a=b#files';
+        $arrPages[] = 'https://acme.com/contao.html';
+        $arrPages[] = 'https://acme.com/';
+
+        //Global aktiviert
+        $GLOBALS['TL_CONFIG']['addLanguageToUrl'] = true;
+        $arrReturn  = $this->AddLanguageToUrlByDomain->getSearchablePagesLang($arrPages, 1, true, 'de');
+        $this->assertEquals($arrPages,$arrReturn);
+
+        //Global deaktiviert, AddToUrl deaktiviert
+        $GLOBALS['TL_CONFIG']['addLanguageToUrl'] = false;
+        $GLOBALS['TL_CONFIG']['useAddToUrl'] = false;
+        $arrReturn  = $this->AddLanguageToUrlByDomain->getSearchablePagesLang($arrPages, 1, true, 'de');
+        $this->assertEquals($arrPages,$arrReturn);
+        
+        //Global deaktiviert, AddToUrl aktiviert, keine Domain definiert
+        $GLOBALS['TL_CONFIG']['useAddToUrl'] = true;
+        $GLOBALS['TL_CONFIG']['useAddToUrlByDomain'] = false;
+        $arrReturn  = $this->AddLanguageToUrlByDomain->getSearchablePagesLang($arrPages, 1, true, 'de');
+        $this->assertEquals($arrPages,$arrReturn);
+        
+        //Global deaktiviert, AddToUrl aktiviert, falsche Domain definiert
+        $GLOBALS['TL_CONFIG']['useAddToUrlByDomain'] = 'falsche.domain.lan';
+        $arrReturn  = $this->AddLanguageToUrlByDomain->getSearchablePagesLang($arrPages, 1, true, 'de');
+        $this->assertEquals($arrPages,$arrReturn);
+
     }
     
+    
+    /**
+     * @covers BugBuster\LangToUrl\AddLanguageToUrlByDomain::getSearchablePagesLang
+     * @covers BugBuster\LangToUrl\AddLanguageToUrlByDomain::buildUrl
+     */    
+    public function testGetSearchablePagesLangRewriteOn()
+    {
+        $arrPages[] = 'https://acme.com/contao.html';
+        $arrPages[] = 'https://ACME.com/';
+        $arrPages[] = 'http://user@acme.com/?a=b#files';
+        
+        
+        //Expected
+        $arrPagesDe[] = 'https://acme.com/de/contao.html';
+        $arrPagesDe[] = 'https://ACME.com/de/';
+        $arrPagesDe[] = 'http://user@acme.com/de/?a=b#files';
+        
+        $GLOBALS['TL_CONFIG']['rewriteURL']          = true;
+        $GLOBALS['TL_CONFIG']['addLanguageToUrl']    = false;
+        $GLOBALS['TL_CONFIG']['useAddToUrl']         = true;
+        $GLOBALS['TL_CONFIG']['useAddToUrlByDomain'] = 'acme.com';
+        
+        //Ohne Sprache, Orginal muss zurück kommmen
+        $arrReturn  = $this->AddLanguageToUrlByDomain->getSearchablePagesLang($arrPages, 1, true);
+        $this->assertEquals($arrPages,$arrReturn);
+
+        //Mit Sprache. Ersetzung muss erfolgen
+        $arrReturn  = $this->AddLanguageToUrlByDomain->getSearchablePagesLang($arrPages, 1, true, 'de');
+        $this->assertEquals($arrPagesDe,$arrReturn);
+    }
+    
+    /**
+     * @covers BugBuster\LangToUrl\AddLanguageToUrlByDomain::getSearchablePagesLang
+     * @covers BugBuster\LangToUrl\AddLanguageToUrlByDomain::buildUrl
+     */
+    public function testGetSearchablePagesLangRewriteOff()
+    {
+        //URLs umschreiben = aus
+        $arrPages[] = 'http://acme.com/index.php/contao.html';
+        $arrPages[] = 'http://user@acme.com/index.php?a=b#files';
+        $arrPages[] = 'http://user@acme.com/index.php/alias.html?a=b#files';
+
+    
+        //Expected
+        $arrPagesDe[] = 'http://acme.com/index.php/de/contao.html';
+        $arrPagesDe[] = 'http://user@acme.com/index.php/de/?a=b#files';
+        $arrPagesDe[] = 'http://user@acme.com/index.php/de/alias.html?a=b#files';
+
+    
+    
+        $GLOBALS['TL_CONFIG']['rewriteURL']          = false;
+        $GLOBALS['TL_CONFIG']['addLanguageToUrl']    = false;
+        $GLOBALS['TL_CONFIG']['useAddToUrl']         = true;
+        $GLOBALS['TL_CONFIG']['useAddToUrlByDomain'] = 'acme.com';
+    
+        //Ohne Sprache, Orginal muss zurück kommmen
+        $arrReturn  = $this->AddLanguageToUrlByDomain->getSearchablePagesLang($arrPages, 1, true);
+        $this->assertEquals($arrPages,$arrReturn);
+    
+        //Mit Sprache. Ersetzung muss erfolgen
+        $arrReturn  = $this->AddLanguageToUrlByDomain->getSearchablePagesLang($arrPages, 1, true, 'de');
+        $this->assertEquals($arrPagesDe,$arrReturn);
+    }
+
+    /**
+     * @covers BugBuster\LangToUrl\AddLanguageToUrlByDomain::buildUrl
+     */
     public function testBuildUrl()
     {
-        //Test URL: http://user@www.example.com/pub/index.php?a=b#files
-        $this->markTestIncomplete("buildUrl test not implemented");
+        $testUrl = 'http://user:pass@www.acme.com:8080/pub/index.php?a=b#files';
+        //fwrite(STDOUT,"\n". __METHOD__ . " parse_url: ".print_r(parse_url($testUrl),true)."\n");
+        $return  = $this->AddLanguageToUrlByDomain->buildUrl(parse_url($testUrl));
+        $this->assertEquals($testUrl,$return);
+        
+        $testUrl = 'http://user:pass@www.acme.com:8080/index.php/alias.html?a=b#files';
+        //fwrite(STDOUT,"\n". __METHOD__ . " parse_url: ".print_r(parse_url($testUrl),true)."\n");
+        $return  = $this->AddLanguageToUrlByDomain->buildUrl(parse_url($testUrl));
+        $this->assertEquals($testUrl,$return);
+        
+        $testUrl = 'http://acme.com';
+        $return  = $this->AddLanguageToUrlByDomain->buildUrl(parse_url($testUrl));
+        $this->assertEquals('http://acme.com/',$return);
+        
+        $return  = $this->AddLanguageToUrlByDomain->buildUrl('string');
+        $this->assertFalse($return);
     }
-    
-    
-    
-    
-    
-}
 
+
+}
