@@ -1,11 +1,6 @@
 <?php
-
 require_once dirname(__FILE__) . '/../src/classes/AddLanguageToUrlByDomain.php';
 
-//require_once 'PHPUnit/Framework/TestCase.php';
-
-define('TL_MODE', 'FE');
-define('TL_PATH', '/subdir');
 
 /**
  * AddLanguageToUrlByDomain test case.
@@ -18,6 +13,16 @@ class AddLanguageToUrlByDomainPathTest extends PHPUnit_Framework_TestCase
      * @var AddLanguageToUrlByDomain
      */
     private $AddLanguageToUrlByDomain;
+    
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public static function setUpBeforeClass()
+    {
+        define('TL_MODE', 'FE');
+        define('TL_PATH', '/subdir');
+    }
 
     /**
      * Prepares the environment before running a test.
