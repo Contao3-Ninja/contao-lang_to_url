@@ -10,7 +10,7 @@ define('TL_PATH', '/subdir');
 /**
  * AddLanguageToUrlByDomain test case.
  */
-class AddLanguageToUrlByDomainTestPath extends PHPUnit_Framework_TestCase
+class AddLanguageToUrlByDomainPathTest extends PHPUnit_Framework_TestCase
 {
 
     /**
