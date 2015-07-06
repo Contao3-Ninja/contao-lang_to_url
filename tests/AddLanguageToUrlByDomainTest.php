@@ -5,6 +5,7 @@ require_once dirname(__FILE__) . '/../src/classes/AddLanguageToUrlByDomain.php';
 //require_once 'PHPUnit/Framework/TestCase.php';
 
 define('TL_MODE', 'FE');
+define('TL_PATH', '');
 
 /**
  * AddLanguageToUrlByDomain test case.
@@ -181,13 +182,12 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
         $arrPages[] = 'https://acme.com/contao.html';
         $arrPages[] = 'https://ACME.com/';
         $arrPages[] = 'http://user@acme.com/?a=b#files';
-        $arrPages[] = 'https://acme.com/subdir/contao.html';
+        
         
         //Expected
         $arrPagesDe[] = 'https://acme.com/de/contao.html';
         $arrPagesDe[] = 'https://ACME.com/de/';
         $arrPagesDe[] = 'http://user@acme.com/de/?a=b#files';
-        $arrPagesDe[] = 'https://acme.com/subdir/de/contao.html';
         
         $GLOBALS['TL_CONFIG']['rewriteURL']          = true;
         $GLOBALS['TL_CONFIG']['addLanguageToUrl']    = false;
@@ -211,17 +211,15 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
     {
         //URLs umschreiben = aus
         $arrPages[] = 'http://acme.com/index.php/contao.html';
-        //URLs umschreiben = aus + Installation in Unterverzeichnis /pub
-        $arrPages[] = 'http://acme.com/pub/index.php/contao.html';
-    
-        $arrPages[] = 'http://user@acme.com/pub/index.php?a=b#files';
-        $arrPages[] = 'http://user@acme.com/pub/index.php/alias.html?a=b#files';
+        $arrPages[] = 'http://user@acme.com/index.php?a=b#files';
+        $arrPages[] = 'http://user@acme.com/index.php/alias.html?a=b#files';
+
     
         //Expected
         $arrPagesDe[] = 'http://acme.com/index.php/de/contao.html';
-        $arrPagesDe[] = 'http://acme.com/pub/index.php/de/contao.html';
-        $arrPagesDe[] = 'http://user@acme.com/pub/index.php/de/?a=b#files';
-        $arrPagesDe[] = 'http://user@acme.com/pub/index.php/de/alias.html?a=b#files';
+        $arrPagesDe[] = 'http://user@acme.com/index.php/de/?a=b#files';
+        $arrPagesDe[] = 'http://user@acme.com/index.php/de/alias.html?a=b#files';
+
     
     
         $GLOBALS['TL_CONFIG']['rewriteURL']          = false;
@@ -260,10 +258,6 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
         $return  = $this->AddLanguageToUrlByDomain->buildUrl('string');
         $this->assertFalse($return);
     }
-    
-    
-    
-    
-    
-}
 
+
+}

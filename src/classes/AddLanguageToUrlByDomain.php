@@ -67,6 +67,7 @@ class AddLanguageToUrlByDomain
         
         unset($intRoot);
         unset($blnSitemap);
+       
         
         //no lang ?
         if ($strLanguage === null)
@@ -111,10 +112,16 @@ class AddLanguageToUrlByDomain
                         }
                         else 
                         {
-                            //TODO Unterverzeichnis beachten, Konstante TL_PATH sollte gesetzt und ungleich null sein
-                            //https://github.com/contao/core/blob/master/system/initialize.php#L136-L149
-                            $arrParse['path'] = '/' . $strLanguage . $arrParse['path'];
-                            $arrPagesLang[] = $this->buildUrl($arrParse);
+                            if (TL_PATH !='') 
+                            {
+                                $arrParse['path'] = str_ireplace(TL_PATH, TL_PATH.'/'.$strLanguage.'', $arrParse['path']);
+                                $arrPagesLang[] = $this->buildUrl($arrParse);
+                            }
+                            else 
+                            {
+                                $arrParse['path'] = '/' . $strLanguage . $arrParse['path'];
+                                $arrPagesLang[] = $this->buildUrl($arrParse);
+                            }
                         }
                     }
                     else 
