@@ -4,3 +4,6 @@
 .settings/
 # Transifex
 /.tx/
+# phpunit
+build/
+
