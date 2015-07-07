@@ -58,9 +58,23 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
      */
     public function testSetOptionGlobalActivated()
     {
+        $Environment = new stdClass();
+        $Environment->tlpath = '';
+        $Environment->path   = '';
+        $Environment->query  = '';
+        
         $GLOBALS['TL_CONFIG']['addLanguageToUrl'] = true;
-        $return = $this->AddLanguageToUrlByDomain->setOption();
+        $return = $this->AddLanguageToUrlByDomain->setOption($Environment);
         $this->assertTrue($return);
+        
+        //in settings
+        $GLOBALS['TL_CONFIG']['addLanguageToUrl'] = false;
+        $Environment->path  = 'contao/main.php';
+        $Environment->query = 'do=settings';
+        
+        $return = $this->AddLanguageToUrlByDomain->setOption($Environment);
+        $this->assertTrue($return);
+        
     }
     
     /**
@@ -68,15 +82,20 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
      */
     public function testSetOptionAddToUrlDeactivated()
     {
+        $Environment = new stdClass();
+        $Environment->tlpath = '';
+        $Environment->path   = '';
+        $Environment->query  = '';
+        
         $GLOBALS['TL_CONFIG']['addLanguageToUrl'] = false;
         
         $GLOBALS['TL_CONFIG']['useAddToUrl'] = false;
-        $return = $this->AddLanguageToUrlByDomain->setOption();
+        $return = $this->AddLanguageToUrlByDomain->setOption($Environment);
         $this->assertFalse($GLOBALS['TL_CONFIG']['addLanguageToUrl']);
         
         $GLOBALS['TL_CONFIG']['useAddToUrl'] = true;
         $GLOBALS['TL_CONFIG']['useAddToUrlByDomain'] = '';
-        $return = $this->AddLanguageToUrlByDomain->setOption();
+        $return = $this->AddLanguageToUrlByDomain->setOption($Environment);
         $this->assertFalse($GLOBALS['TL_CONFIG']['addLanguageToUrl']);
     }
 
@@ -86,11 +105,16 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
      */
     public function testSetOptionAddToUrlActivated()
     {
+        $Environment = new stdClass();
+        $Environment->tlpath = '';
+        $Environment->path   = '';
+        $Environment->query  = '';
+        
         $GLOBALS['TL_CONFIG']['addLanguageToUrl'] = false;
         $GLOBALS['TL_CONFIG']['useAddToUrl'] = true;
         $GLOBALS['TL_CONFIG']['useAddToUrlByDomain'] = 'localhost';
         $_SERVER['SERVER_NAME'] = 'localhost';
-        $return = $this->AddLanguageToUrlByDomain->setOption();
+        $return = $this->AddLanguageToUrlByDomain->setOption($Environment);
         $this->assertTrue($GLOBALS['TL_CONFIG']['addLanguageToUrl']);
         
         
@@ -98,7 +122,7 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
         $GLOBALS['TL_CONFIG']['useAddToUrl'] = true;
         $GLOBALS['TL_CONFIG']['useAddToUrlByDomain'] = 'acme.com, localhost';
         $_SERVER['SERVER_NAME'] = 'localhost';
-        $return = $this->AddLanguageToUrlByDomain->setOption();
+        $return = $this->AddLanguageToUrlByDomain->setOption($Environment);
         $this->assertTrue($GLOBALS['TL_CONFIG']['addLanguageToUrl']);
         
         //Groß Kleinschreibung testen
@@ -106,14 +130,14 @@ class AddLanguageToUrlByDomainTest extends PHPUnit_Framework_TestCase
         $GLOBALS['TL_CONFIG']['useAddToUrl'] = true;
         $GLOBALS['TL_CONFIG']['useAddToUrlByDomain'] = 'acme.com, LOCalhost';
         $_SERVER['SERVER_NAME'] = 'localHOst';
-        $return = $this->AddLanguageToUrlByDomain->setOption();
+        $return = $this->AddLanguageToUrlByDomain->setOption($Environment);
         $this->assertTrue($GLOBALS['TL_CONFIG']['addLanguageToUrl']);
         
         $GLOBALS['TL_CONFIG']['addLanguageToUrl'] = false;
         $GLOBALS['TL_CONFIG']['useAddToUrl'] = true;
         $GLOBALS['TL_CONFIG']['useAddToUrlByDomain'] = 'acme.com, localhost';
         $_SERVER['SERVER_NAME'] = 'c0n7a0.lan';
-        $return = $this->AddLanguageToUrlByDomain->setOption();
+        $return = $this->AddLanguageToUrlByDomain->setOption($Environment);
         $this->assertFalse($GLOBALS['TL_CONFIG']['addLanguageToUrl']);
         
     }
