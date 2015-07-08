@@ -2,10 +2,16 @@
 
 namespace BugBuster\LangToUrl;
 
+
 class AddLanguageToUrlByDomain 
 {
 
-    public function setOption($Environment = null)
+    /**
+     * Hook initializeSystem call without parameters
+     * 
+     * @param stdClass    $Environment    Only if PHPUnit is used
+     */
+    public function setOption(\stdClass $Environment = null)
     {
         if (true === (bool) $GLOBALS['TL_CONFIG']['addLanguageToUrl'])
         {
@@ -17,15 +23,16 @@ class AddLanguageToUrlByDomain
             $arrUrl = parse_url(substr(\Environment::get('requestUri'), strlen(TL_PATH) + 1));
             $query  = explode('&', $arrUrl['query']); // Abtrennen &ref=....
             $arrUrl['query'] = $query[0];
+            $TL_MODE = TL_MODE;
         }
         else 
         {   //PHPUnit Call
-            defined('TL_PATH') or define('TL_PATH', $Environment->tlpath);
+            $TL_MODE = $Environment->tlmode;
             $arrUrl['path']  = $Environment->path;
             $arrUrl['query'] = $Environment->query;
         }
         
-        if (TL_MODE == 'BE' &&
+        if ($TL_MODE == 'BE' &&
             $arrUrl['path']  == 'contao/main.php' &&
             $arrUrl['query'] == 'do=settings'
            )
@@ -75,7 +82,7 @@ class AddLanguageToUrlByDomain
      * @param string $blnSitemap
      * @param string $strLanguage
      */
-    public function getSearchablePagesLang($arrPages, $intRoot=null, $blnSitemap=false, $strLanguage=null)
+    public function getSearchablePagesLang($arrPages, $intRoot=null, $blnSitemap=false, $strLanguage=null, \stdClass $Environment = null)
     {
         if (true === (bool) $GLOBALS['TL_CONFIG']['addLanguageToUrl'])
         {
@@ -91,6 +98,16 @@ class AddLanguageToUrlByDomain
         {
             return $arrPages;
         }
+        
+        if ($Environment === null)
+        {   //Hook Call
+            $TL_PATH = TL_PATH;
+        }
+        else
+        {   //PHPUnit Call
+            $TL_PATH = $Environment->tlpath;
+        }
+        
         //AddToUrl aktiviert?
         if ( isset($GLOBALS['TL_CONFIG']['useAddToUrl']) &&
              true === (bool) $GLOBALS['TL_CONFIG']['useAddToUrl']
@@ -129,9 +146,9 @@ class AddLanguageToUrlByDomain
                         }
                         else 
                         {
-                            if (TL_PATH !='') 
+                            if ($TL_PATH !='') 
                             {
-                                $arrParse['path'] = str_ireplace(TL_PATH, TL_PATH.'/'.$strLanguage.'', $arrParse['path']);
+                                $arrParse['path'] = str_ireplace($TL_PATH, $TL_PATH.'/'.$strLanguage.'', $arrParse['path']);
                                 $arrPagesLang[] = $this->buildUrl($arrParse);
                             }
                             else 
