@@ -5,6 +5,11 @@ namespace BugBuster\LangToUrl;
 class AddLanguageToUrlByDomain 
 {
 
+    /**
+     * Hook initializeSystem call without parameters
+     * 
+     * @param stdClass    $Environment    Only if PHPUnit is used
+     */
     public function setOption($Environment = null)
     {
         if (true === (bool) $GLOBALS['TL_CONFIG']['addLanguageToUrl'])
