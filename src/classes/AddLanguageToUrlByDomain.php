@@ -5,15 +5,32 @@ namespace BugBuster\LangToUrl;
 class AddLanguageToUrlByDomain 
 {
 
-    public function setOption()
+    public function setOption($Environment = null)
     {
-        if (TL_MODE == 'BE')
+        if (true === (bool) $GLOBALS['TL_CONFIG']['addLanguageToUrl'])
+        {
+            return true; //raus, soll ja offenbar bei allen Domains sein
+        }
+        
+        if ($Environment === null) 
+        {   //Hook Call
+            $arrUrl = parse_url(substr(\Environment::get('requestUri'), strlen(TL_PATH) + 1));
+            $query  = explode('&', $arrUrl['query']); // Abtrennen &ref=....
+            $arrUrl['query'] = $query[0];
+        }
+        else 
+        {   //PHPUnit Call
+            defined('TL_PATH') or define('TL_PATH', $Environment->tlpath);
+            $arrUrl['path']  = $Environment->path;
+            $arrUrl['query'] = $Environment->query;
+        }
+        
+        if (TL_MODE == 'BE' &&
+            $arrUrl['path']  == 'contao/main.php' &&
+            $arrUrl['query'] == 'do=settings'
+           )
         {
         	return true; //raus, sonst wuerde addLanguageToUrl gleich mit gesetzt werden
-        }
-        if (true === (bool) $GLOBALS['TL_CONFIG']['addLanguageToUrl']) 
-        {
-        	return true; //raus, soll ja offenbar bei allen Domains sein
         }
         
         //AddToUrl aktiviert?
@@ -206,4 +223,5 @@ class AddLanguageToUrlByDomain
         
         return $newurl;
     }
+    
 }
