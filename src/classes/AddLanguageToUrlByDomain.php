@@ -10,7 +10,7 @@ class AddLanguageToUrlByDomain
      * 
      * @param stdClass    $Environment    Only if PHPUnit is used
      */
-    public function setOption($Environment = null)
+    public function setOption(stdClass $Environment = null)
     {
         if (true === (bool) $GLOBALS['TL_CONFIG']['addLanguageToUrl'])
         {
@@ -22,12 +22,10 @@ class AddLanguageToUrlByDomain
             $arrUrl = parse_url(substr(\Environment::get('requestUri'), strlen(TL_PATH) + 1));
             $query  = explode('&', $arrUrl['query']); // Abtrennen &ref=....
             $arrUrl['query'] = $query[0];
-            $TL_PATH = TL_PATH;
             $TL_MODE = TL_MODE;
         }
         else 
         {   //PHPUnit Call
-            $TL_PATH = $Environment->tlpath;
             $TL_MODE = $Environment->tlmode;
             $arrUrl['path']  = $Environment->path;
             $arrUrl['query'] = $Environment->query;
