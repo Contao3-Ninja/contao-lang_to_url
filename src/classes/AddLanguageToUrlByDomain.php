@@ -2,6 +2,7 @@
 
 namespace BugBuster\LangToUrl;
 
+
 class AddLanguageToUrlByDomain 
 {
 
@@ -10,7 +11,7 @@ class AddLanguageToUrlByDomain
      * 
      * @param stdClass    $Environment    Only if PHPUnit is used
      */
-    public function setOption(stdClass $Environment = null)
+    public function setOption(\stdClass $Environment = null)
     {
         if (true === (bool) $GLOBALS['TL_CONFIG']['addLanguageToUrl'])
         {
@@ -81,7 +82,7 @@ class AddLanguageToUrlByDomain
      * @param string $blnSitemap
      * @param string $strLanguage
      */
-    public function getSearchablePagesLang($arrPages, $intRoot=null, $blnSitemap=false, $strLanguage=null, $Environment = null)
+    public function getSearchablePagesLang($arrPages, $intRoot=null, $blnSitemap=false, $strLanguage=null, \stdClass $Environment = null)
     {
         if (true === (bool) $GLOBALS['TL_CONFIG']['addLanguageToUrl'])
         {
