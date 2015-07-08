@@ -1,6 +1,4 @@
 <?php
-require_once dirname(__FILE__) . '/../src/classes/AddLanguageToUrlByDomain.php';
-
 
 /**
  * AddLanguageToUrlByDomain test case.
@@ -14,14 +12,15 @@ class AddLanguageToUrlByDomainPathTest extends PHPUnit_Framework_TestCase
      */
     private $AddLanguageToUrlByDomain;
     
+    private static $Environment;
+    
     /**
      * @runInSeparateProcess
      * @preserveGlobalState disabled
      */
     public static function setUpBeforeClass()
     {
-        define('TL_MODE', 'FE');
-        define('TL_PATH', '/subdir');
+        self::$Environment = new stdClass();
     }
 
     /**
@@ -32,6 +31,11 @@ class AddLanguageToUrlByDomainPathTest extends PHPUnit_Framework_TestCase
         parent::setUp();
         
         $this->AddLanguageToUrlByDomain = new BugBuster\LangToUrl\AddLanguageToUrlByDomain(/* parameters */);
+        
+        self::$Environment->tlmode = 'FE';
+        self::$Environment->tlpath = '/subdir';
+        self::$Environment->path   = '';
+        self::$Environment->query  = '';
     }
 
     /**
@@ -59,7 +63,7 @@ class AddLanguageToUrlByDomainPathTest extends PHPUnit_Framework_TestCase
     public function testSetOptionGlobalActivated()
     {
         $GLOBALS['TL_CONFIG']['addLanguageToUrl'] = true;
-        $return = $this->AddLanguageToUrlByDomain->setOption();
+        $return = $this->AddLanguageToUrlByDomain->setOption(self::$Environment);
         $this->assertTrue($return);
     }
     
@@ -81,7 +85,7 @@ class AddLanguageToUrlByDomainPathTest extends PHPUnit_Framework_TestCase
         $GLOBALS['TL_CONFIG']['useAddToUrlByDomain'] = 'acme.com';
         
         //Mit Sprache. Mit Verzeichnis Ersetzung muss erfolgen
-        $arrReturn  = $this->AddLanguageToUrlByDomain->getSearchablePagesLang($arrPages, 1, true, 'de');
+        $arrReturn  = $this->AddLanguageToUrlByDomain->getSearchablePagesLang($arrPages, 1, true, 'de', self::$Environment);
         $this->assertEquals($arrPagesDe,$arrReturn);
        
     }
@@ -108,7 +112,7 @@ class AddLanguageToUrlByDomainPathTest extends PHPUnit_Framework_TestCase
         $GLOBALS['TL_CONFIG']['useAddToUrlByDomain'] = 'acme.com';
         
         //Mit Sprache. Ersetzung muss erfolgen
-        $arrReturn  = $this->AddLanguageToUrlByDomain->getSearchablePagesLang($arrPages, 1, true, 'de');
+        $arrReturn  = $this->AddLanguageToUrlByDomain->getSearchablePagesLang($arrPages, 1, true, 'de', self::$Environment);
         $this->assertEquals($arrPagesDe,$arrReturn);
         
     }
